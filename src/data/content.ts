@@ -130,11 +130,13 @@ export type Project = {
   live?: string;
   demo?: { user: string; password: string };
   note?: string;
+  image?: string; // screenshot in public/images/projects/; hidden if the file is missing
 };
 
 export const projects: Project[] = [
   {
     slug: 'helpdesk-api',
+    image: '/images/projects/helpdesk-api.webp',
     name: 'HelpDesk API',
     pitch: 'Spring Boot REST API for IT support tickets, with JWT security and role-based access.',
     tags: ['Spring Boot', 'JWT', 'PostgreSQL'],
@@ -172,6 +174,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'loopmotion',
+    image: '/images/projects/loopmotion.webp',
     name: 'LoopMotion',
     pitch: 'Demo web app that generates images and videos with AI, with long video jobs handled in the background.',
     tags: ['React', 'Express', 'AI', 'Inngest'],
@@ -197,6 +200,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'wild-oasis',
+    image: '/images/projects/wild-oasis.webp',
     name: 'The Wild Oasis',
     pitch: 'Internal hotel management app for staff to manage cabins, bookings and guest check-ins.',
     tags: ['React', 'React Query', 'Supabase'],
@@ -223,6 +227,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'game-hub',
+    image: '/images/projects/game-hub.webp',
     name: 'Game Hub',
     pitch: 'Video game discovery app for finding games by platform and genre.',
     tags: ['React', 'TypeScript', 'Chakra UI'],

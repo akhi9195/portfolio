@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { education, experience, profile, projects, recognition, skills, type Project } from '../data/content';
 import { CLEAR, type Command, type Ctx, type Theme } from './types';
 
@@ -18,11 +18,27 @@ const Ext = ({ href, children }: { href: string; children: ReactNode }) => (
   </a>
 );
 
+// Shows a screenshot if the file exists, otherwise renders nothing.
+function ProjectShot({ src, alt }: { src: string; alt: string }) {
+  const [missing, setMissing] = useState(false);
+  if (missing) return null;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      onError={() => setMissing(true)}
+      className="w-full rounded-md border border-line"
+    />
+  );
+}
+
 function ProjectCard({ p }: { p: Project }) {
   return (
     <div className="space-y-2 border-l-2 border-line pl-4">
       <div className="text-lg font-bold text-accent">{p.name}</div>
       <div className="text-dim">{p.pitch}</div>
+      {p.image && <ProjectShot src={p.image} alt={`${p.name} screenshot`} />}
       {p.problem && (
         <p>
           <span className="text-accent">problem: </span>
