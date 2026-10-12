@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import Terminal from './components/Terminal';
 import './index.css';
 
@@ -9,5 +10,7 @@ const initial = new URLSearchParams(window.location.search).get('cmd') ?? undefi
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Terminal initial={initial} />
+    {/* Vercel Web Analytics: counts visits once enabled in the Vercel dashboard. No cookies. */}
+    <Analytics />
   </React.StrictMode>,
 );

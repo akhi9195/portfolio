@@ -1,28 +1,43 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
-import { commands } from '../terminal/commands';
-import { execute } from '../terminal/engine';
-import { CLEAR, type Theme } from '../terminal/types';
-import { profile, projects } from '../data/content';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
+import { commands } from "../terminal/commands";
+import { execute } from "../terminal/engine";
+import { CLEAR, type Theme } from "../terminal/types";
+import { profile, projects } from "../data/content";
 
 type Line = { id: number; echo?: string; node?: ReactNode };
 
-const THEMES: Theme[] = ['green', 'amber', 'light'];
-const QUICK = ['about', 'projects', 'experience', 'skills', 'contact', 'resume'];
+const THEMES: Theme[] = ["green", "amber", "light"];
+const QUICK = [
+  "about",
+  "projects",
+  "experience",
+  "skills",
+  "contact",
+  "resume",
+];
 
 function readTheme(): Theme {
   try {
-    const saved = localStorage.getItem('theme');
+    const saved = localStorage.getItem("theme");
     if (saved && (THEMES as string[]).includes(saved)) return saved as Theme;
   } catch {
     // Storage can be blocked (private mode); fall back to the default.
   }
-  return 'green';
+  return "green";
 }
 
 export default function Terminal({ initial }: { initial?: string }) {
   const [lines, setLines] = useState<Line[]>([]);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [theme, setTheme] = useState<Theme>(readTheme);
+  const [focused, setFocused] = useState(false);
   const history = useRef<string[]>([]);
   const historyPos = useRef(-1);
   const nextId = useRef(0);
@@ -33,14 +48,14 @@ export default function Terminal({ initial }: { initial?: string }) {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     try {
-      localStorage.setItem('theme', theme);
+      localStorage.setItem("theme", theme);
     } catch {
       // Ignore: the theme still applies for this visit.
     }
   }, [theme]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'nearest' });
+    endRef.current?.scrollIntoView({ block: "nearest" });
   }, [lines]);
 
   // Runs one line: echoes it, then prints the result (or clears the screen).
@@ -52,7 +67,7 @@ export default function Terminal({ initial }: { initial?: string }) {
     historyPos.current = -1;
 
     if (!text) {
-      setLines((l) => [...l, { id: ++nextId.current, echo: '' }]);
+      setLines((l) => [...l, { id: ++nextId.current, echo: "" }]);
       return;
     }
 
@@ -70,50 +85,63 @@ export default function Terminal({ initial }: { initial?: string }) {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    runLine(initial ?? 'whoami');
+    runLine(initial ?? "whoami");
+    // On desktop, focus the prompt so visitors can type straight away.
+    // Skipped on touch screens so the keyboard doesn't pop up on load.
+    if (window.matchMedia?.("(pointer: fine)").matches) {
+      inputRef.current?.focus({ preventScroll: true });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function complete() {
-    const parts = value.split(' ');
+    const parts = value.split(" ");
     const word = parts[parts.length - 1].toLowerCase();
     let pool: string[] = [];
     if (parts.length === 1) {
       pool = commands.flatMap((c) => [c.name, ...(c.aliases ?? [])]);
-    } else if (['cd', 'open'].includes(parts[0]) && parts.length === 2) {
+    } else if (["cd", "open"].includes(parts[0]) && parts.length === 2) {
       pool = projects.map((p) => p.slug);
     }
     const matches = pool.filter((p) => p.startsWith(word));
 
     if (matches.length === 1) {
-      const completed = [...parts.slice(0, -1), matches[0]].join(' ');
+      const completed = [...parts.slice(0, -1), matches[0]].join(" ");
       setValue(parts.length === 1 ? `${completed} ` : completed);
     } else if (matches.length > 1) {
-      setLines((l) => [...l, { id: ++nextId.current, node: <span className="text-dim">{matches.join('   ')}</span> }]);
+      setLines((l) => [
+        ...l,
+        {
+          id: ++nextId.current,
+          node: <span className="text-dim">{matches.join("   ")}</span>,
+        },
+      ]);
     }
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Tab') {
+    if (e.key === "Tab") {
       e.preventDefault();
       complete();
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (history.current.length === 0) return;
       historyPos.current =
-        historyPos.current === -1 ? history.current.length - 1 : Math.max(0, historyPos.current - 1);
+        historyPos.current === -1
+          ? history.current.length - 1
+          : Math.max(0, historyPos.current - 1);
       setValue(history.current[historyPos.current]);
-    } else if (e.key === 'ArrowDown') {
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
       if (historyPos.current === -1) return;
       historyPos.current++;
       if (historyPos.current >= history.current.length) {
         historyPos.current = -1;
-        setValue('');
+        setValue("");
       } else {
         setValue(history.current[historyPos.current]);
       }
-    } else if (e.key === 'l' && e.ctrlKey) {
+    } else if (e.key === "l" && e.ctrlKey) {
       e.preventDefault();
       setLines([]);
     }
@@ -122,7 +150,7 @@ export default function Terminal({ initial }: { initial?: string }) {
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     runLine(value);
-    setValue('');
+    setValue("");
   }
 
   return (
@@ -170,24 +198,51 @@ export default function Terminal({ initial }: { initial?: string }) {
           <div ref={endRef} />
         </div>
 
-        <form onSubmit={onSubmit} className="flex items-center gap-2 border-t border-line px-4 py-3">
+        <form
+          onSubmit={onSubmit}
+          className="flex items-center gap-2 border-t border-line px-4 py-3"
+        >
           <label htmlFor="cmd" className="shrink-0 text-accent">
             {profile.handle}:~$
           </label>
-          <input
-            id="cmd"
-            ref={inputRef}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={onKeyDown}
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            className="min-w-0 w-0 flex-1 bg-transparent text-term outline-none"
-          />
+          <div className="relative min-w-0 flex-1">
+            <input
+              id="cmd"
+              ref={inputRef}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={onKeyDown}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              aria-describedby="cmd-hint"
+              className={`w-full bg-transparent text-term outline-none ${value ? "" : "caret-transparent"}`}
+            />
+            {/* Blinking block cursor + hint while the prompt is empty, so visitors know they can type. */}
+            {!value && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-y-0 left-0 flex items-center gap-3 overflow-hidden whitespace-nowrap"
+              >
+                <span className="cursor-blink inline-block h-[1.15em] w-[0.15em] bg-term" />
+                <span className={`text-dim ${focused ? "opacity-60" : ""}`}>
+                  <span className="hidden sm:inline">
+                    type a command, e.g. help, or click one below
+                  </span>
+                  <span className="sm:hidden">type help</span>
+                </span>
+              </div>
+            )}
+          </div>
+          <span id="cmd-hint" className="sr-only">
+            Type a command such as help, then press Enter.
+          </span>
         </form>
 
-        <div className="flex flex-wrap gap-2 border-t border-line px-4 py-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2 border-t border-line px-4 py-3 text-xs">
+          <span className="text-dim">try:</span>
           {QUICK.map((c) => (
             <button
               key={c}
@@ -197,7 +252,9 @@ export default function Terminal({ initial }: { initial?: string }) {
               {c}
             </button>
           ))}
-          <span className="ml-auto self-center text-dim">Tab completes · ↑↓ history · type help</span>
+          <span className="ml-auto self-center text-dim">
+            Tab completes · ↑↓ history · type help
+          </span>
         </div>
       </div>
     </div>

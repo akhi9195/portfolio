@@ -47,3 +47,20 @@ button {
   background: transparent;
   font-family: inherit;
 }
+
+/* Blinking block cursor shown beside the empty prompt */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: blink 1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-blink {
+    animation: none;
+  }
+}
