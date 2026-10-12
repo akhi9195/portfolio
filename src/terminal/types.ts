@@ -1,18 +1,29 @@
 import type { ReactNode } from 'react';
 
-export const CLEAR = Symbol('clear');
-
 export type Theme = 'green' | 'amber' | 'light';
+export const THEMES: Theme[] = ['green', 'amber', 'light'];
 
 export type Ctx = {
-  run: (line: string) => void;
-  setTheme: (theme: Theme) => void;
+  /** Run another command as if the visitor typed it. */
+  run: (input: string) => void;
+  clear: () => void;
+  theme: Theme;
+  setTheme: (t: Theme) => void;
+  navigate: (path: string) => void;
+  /** Set when the terminal is open as an overlay inside the 3D room. */
+  exit?: () => void;
+  /** True only for the first automatic `whoami`, which types itself out. */
+  typing?: boolean;
 };
 
 export type Command = {
   name: string;
   aliases?: string[];
-  usage?: string;
   description: string;
-  run: (args: string[], ctx: Ctx) => ReactNode | typeof CLEAR;
+  usage?: string;
+  /** Hidden commands work but are not listed in `help`. */
+  hidden?: boolean;
+  /** Values for tab completion of the first argument. */
+  complete?: () => string[];
+  run: (args: string[], ctx: Ctx) => ReactNode | void;
 };

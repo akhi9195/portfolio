@@ -1,8 +1,11 @@
-// Splits a raw input line into a command name and arguments.
-// Respects double and single quotes, so: ask "what is your stack"
-export function parse(input: string): { name: string; args: string[] } {
-  const tokens = input.trim().match(/"[^"]*"|'[^']*'|\S+/g) ?? [];
-  const clean = tokens.map((t) => (/^(["']).*\1$/.test(t) ? t.slice(1, -1) : t));
-  const [name = '', ...args] = clean;
+export type Parsed = { name: string; args: string[] };
+
+/** Splits input into a command name and arguments. Quotes group words: ask "are you remote?" */
+export function parse(input: string): Parsed {
+  const tokens: string[] = [];
+  const re = /"([^"]*)"|'([^']*)'|(\S+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(input.trim())) !== null) tokens.push(m[1] ?? m[2] ?? m[3]);
+  const [name = '', ...args] = tokens;
   return { name: name.toLowerCase(), args };
 }

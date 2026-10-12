@@ -3,64 +3,84 @@
 @tailwind utilities;
 
 :root {
-  --bg: #050806;
-  --term: #4ade80;
-  --dim: #86a98f;
-  --accent: #fde68a;
-  --line: #1f3a2a;
-}
-
-[data-theme='amber'] {
-  --bg: #0d0a03;
-  --term: #fbbf24;
-  --dim: #b08a3a;
-  --accent: #fef3c7;
-  --line: #3d2e0e;
-}
-
-[data-theme='light'] {
-  --bg: #f7f7f2;
-  --term: #14532d;
-  --dim: #4b5b50;
-  --accent: #0f766e;
-  --line: #c9d6c4;
+  color-scheme: dark;
 }
 
 html,
-body {
-  background: var(--bg);
-  margin: 0;
+body,
+#root {
+  height: 100%;
 }
 
 body {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--term);
+  @apply bg-ink-950 text-slate-100 font-sans antialiased;
 }
 
-a {
-  color: var(--accent);
+:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 2px;
 }
 
-button {
-  cursor: pointer;
-  color: var(--term);
-  background: transparent;
-  font-family: inherit;
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
 }
 
-/* Blinking block cursor shown beside the empty prompt */
+/* Terminal themes */
+.term {
+  --term-bg: #0a0f0a;
+  --term-fg: #b8f5c4;
+  --term-dim: #6fae7c;
+  --term-accent: #4ade80;
+  --term-link: #86efac;
+  --term-err: #fca5a5;
+}
+.term[data-theme='amber'] {
+  --term-bg: #120c03;
+  --term-fg: #fcd9a0;
+  --term-dim: #c99a55;
+  --term-accent: #fbbf24;
+  --term-link: #fde68a;
+  --term-err: #fca5a5;
+}
+.term[data-theme='light'] {
+  color-scheme: light;
+  --term-bg: #f8fafc;
+  --term-fg: #1e293b;
+  --term-dim: #475569;
+  --term-accent: #047857;
+  --term-link: #1d4ed8;
+  --term-err: #b91c1c;
+}
+
+.term-cursor {
+  animation: blink 1s steps(1) infinite;
+}
 @keyframes blink {
   50% {
     opacity: 0;
   }
 }
-
-.cursor-blink {
-  animation: blink 1s steps(1) infinite;
+@media (prefers-reduced-motion: reduce) {
+  .term-cursor {
+    animation: none;
+  }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .cursor-blink {
-    animation: none;
+@media print {
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@media print {
+  .resume * {
+    color: #111 !important;
+    background: transparent !important;
+    border-color: #ccc !important;
   }
 }

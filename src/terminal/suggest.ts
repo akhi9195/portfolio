@@ -1,21 +1,6 @@
-// Returns the closest candidate within 2 edits, or null. Used for "Did you mean…?"
-export function suggest(input: string, candidates: string[]): string | null {
-  let best: string | null = null;
-  let bestDistance = 3;
-  for (const candidate of candidates) {
-    const d = levenshtein(input, candidate);
-    if (d < bestDistance) {
-      bestDistance = d;
-      best = candidate;
-    }
-  }
-  return best;
-}
-
-export function levenshtein(a: string, b: string): number {
-  const dp: number[][] = Array.from({ length: a.length + 1 }, (_, i) =>
-    Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)),
-  );
+export function distance(a: string, b: string): number {
+  const dp = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) dp[0][j] = j;
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
@@ -23,4 +8,21 @@ export function levenshtein(a: string, b: string): number {
     }
   }
   return dp[a.length][b.length];
+}
+
+/** Closest candidate within a small edit distance, or a prefix match. */
+export function suggest(input: string, candidates: string[]): string | undefined {
+  const word = input.toLowerCase();
+  if (!word) return undefined;
+  let best: string | undefined;
+  let bestD = Infinity;
+  for (const c of candidates) {
+    const d = c.startsWith(word) ? 0.5 : distance(word, c);
+    if (d < bestD) {
+      best = c;
+      bestD = d;
+    }
+  }
+  const limit = word.length <= 3 ? 1 : 2;
+  return bestD <= limit ? best : undefined;
 }

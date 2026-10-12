@@ -3,12 +3,14 @@ export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
-        bg: 'var(--bg)',
-        term: 'var(--term)',
-        dim: 'var(--dim)',
-        accent: 'var(--accent)',
-        line: 'var(--line)',
+        ink: { 950: '#0b1020', 900: '#111831', 800: '#1a2342', 700: '#26315a' },
+        mint: { 400: '#5eead4', 500: '#2dd4bf' },
+        glow: '#fbbf24',
       },
     },
   },
